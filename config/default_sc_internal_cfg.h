@@ -68,7 +68,7 @@
  *  \par Limits:
  *       Must be true or false
  */
-#define SC_PLATFORM_ENABLE_HEADER_UPDATE false
+#define SC_PLATFORM_ENABLE_HEADER_UPDATE true
 
 /**
  * \brief  Max number of commands per wakeup

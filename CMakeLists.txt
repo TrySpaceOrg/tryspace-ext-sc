@@ -10,6 +10,7 @@ set(APP_SRC_FILES
   fsw/src/sc_cmds.c
   fsw/src/sc_dispatch.c
 )
+include_directories(${APPLICATION_PLATFORM_INC_LIST})
 
 # Create the app module
 add_cfe_app(sc ${APP_SRC_FILES})
