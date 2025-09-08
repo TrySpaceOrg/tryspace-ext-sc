@@ -573,6 +573,10 @@ void SC_LoadDefaultTables(void)
                     "RTS table %d failed to load, returned: 0x%08lX", (int)RtsIndex, (unsigned long)Status);
             }
         }
+        else
+        {
+            NotLoadedCount++;
+        }
     }
 
     /* Display startup RTS not loaded count */
