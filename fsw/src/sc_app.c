@@ -43,6 +43,9 @@
 #include "sc_verify.h"
 #include <string.h>
 
+/* OSAL file API for OS_stat() */
+#include "osapi-file.h"
+
 /**************************************************************************
  **
  ** Global variables
@@ -545,6 +548,7 @@ void SC_LoadDefaultTables(void)
     int32 RtsIndex;
     int32 NotLoadedCount = 0;
     int32 Status;
+    os_fstat_t FileStat;
 
     /*
     ** Currently, only RTS tables are loaded during initialization.
@@ -556,14 +560,22 @@ void SC_LoadDefaultTables(void)
         /* Example filename: /cf/apps/sc_rts001.tbl */
         snprintf(TableName, sizeof(TableName), "%s%03d.tbl", SC_RTS_FILE_NAME, (int)(RtsIndex + 1));
 
-        Status = CFE_TBL_Load(SC_OperData.RtsTblHandle[RtsIndex], CFE_TBL_SRC_FILE, TableName);
-        if (Status != CFE_SUCCESS)
+        /* Check that table file exists before attempting to load it */
+        if (OS_stat(TableName, &FileStat) == OS_SUCCESS)
+        {
+            Status = CFE_TBL_Load(SC_OperData.RtsTblHandle[RtsIndex], CFE_TBL_SRC_FILE, TableName);
+            if (Status != CFE_SUCCESS)
+            {
+                NotLoadedCount++;
+                
+                /* send an event for each failed load */
+                CFE_EVS_SendEvent(SC_RTS_LOAD_FAIL_DBG_EID, CFE_EVS_EventType_DEBUG,
+                    "RTS table %d failed to load, returned: 0x%08lX", (int)RtsIndex, (unsigned long)Status);
+            }
+        }
+        else
         {
             NotLoadedCount++;
-
-            /* send an event for each failed load */
-            CFE_EVS_SendEvent(SC_RTS_LOAD_FAIL_DBG_EID, CFE_EVS_EventType_DEBUG,
-                              "RTS table %d failed to load, returned: 0x%08lX", (int)RtsIndex, (unsigned long)Status);
         }
     }
 
